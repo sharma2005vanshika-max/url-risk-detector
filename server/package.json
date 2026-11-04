@@ -1,0 +1,17 @@
+{
+  "name": "url-risk-detector-server",
+  "version": "1.0.0",
+  "description": "High-performance heuristic and live telemetry URL Risk Detection API",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "node test-scanner.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2"
+  }
+}
