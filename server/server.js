@@ -1,8 +1,7 @@
 const http = require('http');
 const { analyzeUrl, defangUrl, refangUrl } = require('./analyzer');
 
-const PORT = process.env.PORT || 5001;
-
+const PORT = Number(process.env.PORT) || 10000;
 // Sample demonstration URLs for fast 1-click testing
 const DEMO_URLS = [
   {
@@ -212,7 +211,6 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-server.listen(PORT, () => {
-  console.log(`[URL-RISK-DETECTOR API] Running on http://localhost:${PORT}`);
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`[URL-RISK-DETECTOR API] Running on 0.0.0.0:${PORT}`);
 });
-
