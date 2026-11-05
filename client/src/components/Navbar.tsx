@@ -1,9 +1,9 @@
 import React from 'react';
-import { Shield, Radar, Layers, ShieldCheck, History, BookOpen } from 'lucide-react';
+import { Shield, Radar, Layers, ShieldCheck, History, BookOpen, Database } from 'lucide-react';
 
 interface NavbarProps {
-  activeTab: 'single' | 'batch' | 'defang' | 'history' | 'academy';
-  setActiveTab: (tab: 'single' | 'batch' | 'defang' | 'history' | 'academy') => void;
+  activeTab: 'single' | 'batch' | 'defang' | 'history' | 'academy' | 'intel';
+  setActiveTab: (tab: 'single' | 'batch' | 'defang' | 'history' | 'academy' | 'intel') => void;
   serverOnline: boolean;
 }
 
@@ -31,7 +31,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, serverO
           </div>
 
           {/* Navigation Tabs */}
-          <nav className="hidden md:flex items-center gap-1 bg-cyber-950 p-1 rounded-xl border border-cyber-border">
+          <nav className="hidden lg:flex items-center gap-1 bg-cyber-950 p-1 rounded-xl border border-cyber-border">
             <button
               onClick={() => setActiveTab('single')}
               className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
@@ -54,6 +54,22 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, serverO
             >
               <Layers className="w-4 h-4" />
               <span>Batch Scan</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('intel')}
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                activeTab === 'intel'
+                  ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-cyber-850'
+              }`}
+            >
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
+              </span>
+              <Database className="w-4 h-4" />
+              <span>Live Intel (DB)</span>
             </button>
 
             <button
@@ -105,7 +121,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, serverO
         </div>
 
         {/* Mobile Navigation Row */}
-        <div className="flex md:hidden items-center justify-around py-2 border-t border-cyber-border/50 text-xs">
+        <div className="flex lg:hidden items-center justify-around py-2 border-t border-cyber-border/50 text-xs">
           <button
             onClick={() => setActiveTab('single')}
             className={`flex flex-col items-center gap-1 ${activeTab === 'single' ? 'text-cyan-400' : 'text-slate-400'}`}
@@ -119,6 +135,13 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, serverO
           >
             <Layers className="w-4 h-4" />
             <span className="text-[10px]">Batch</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('intel')}
+            className={`flex flex-col items-center gap-1 ${activeTab === 'intel' ? 'text-cyan-400' : 'text-slate-400'}`}
+          >
+            <Database className="w-4 h-4" />
+            <span className="text-[10px]">Intel</span>
           </button>
           <button
             onClick={() => setActiveTab('defang')}

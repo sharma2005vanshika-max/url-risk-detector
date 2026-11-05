@@ -1,5 +1,6 @@
 const http = require('http');
 const { analyzeUrl, defangUrl, refangUrl } = require('./analyzer');
+const { saveScanLog, getRecentScans, getGlobalStats, isSupabaseConfigured } = require('./db');
 
 const PORT = Number(process.env.PORT) || 10000;
 // Sample demonstration URLs for fast 1-click testing
@@ -71,6 +72,8 @@ function parseJsonBody(req) {
 }
 
 const server = http.createServer(async (req, res) => {
+  const startTime = Date.now();
+
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     setCorsHeaders(res);
@@ -81,6 +84,20 @@ const server = http.createServer(async (req, res) => {
   const reqUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
   const pathname = reqUrl.pathname;
 
+  // Skip logging for static asset requests (js, css, fonts)
+  const isStaticAsset = /\.(js|css|png|svg|ico|woff2?|jpg)$/.test(pathname);
+  if (!isStaticAsset) {
+    console.log(`\n📡 [${new Date().toISOString()}] ${req.method} ${pathname}`);
+  }
+
+  // Wrap res.writeHead to capture status code for logging
+  const originalWriteHead = res.writeHead.bind(res);
+  let statusCode = 200;
+  res.writeHead = (code, ...args) => {
+    statusCode = code;
+    return originalWriteHead(code, ...args);
+  };
+
   try {
     // Health Check
     if (req.method === 'GET' && pathname === '/api/health') {
@@ -88,8 +105,21 @@ const server = http.createServer(async (req, res) => {
         status: 'healthy',
         timestamp: new Date().toISOString(),
         service: 'AegisGuard URL Risk Detector API v1.0',
-        uptime: process.uptime()
+        uptime: process.uptime(),
+        database: isSupabaseConfigured ? 'Supabase Connected' : 'Local Storage Mode'
       });
+    }
+
+    // Global Statistics Endpoint (for Live Intelligence dashboard)
+    if (req.method === 'GET' && pathname === '/api/stats') {
+      const stats = await getGlobalStats();
+      return sendJson(res, 200, stats);
+    }
+
+    // Recent Scans Endpoint (for Live Intelligence feed)
+    if (req.method === 'GET' && pathname === '/api/recent-scans') {
+      const recent = await getRecentScans(50);
+      return sendJson(res, 200, recent);
     }
 
     // Sample URLs
@@ -105,7 +135,22 @@ const server = http.createServer(async (req, res) => {
         return sendJson(res, 400, { error: 'Please provide a valid URL string.' });
       }
 
+      console.log(`   🔍 Scanning: ${url.trim()}`);
       const result = await analyzeUrl(url.trim());
+      const duration = Date.now() - startTime;
+
+      const riskEmoji = result.riskScore >= 70 ? '🔴' : result.riskScore >= 45 ? '🟡' : result.riskScore >= 20 ? '🔵' : '🟢';
+      console.log(`   ${riskEmoji} Risk Score: ${result.riskScore}/100  |  Level: ${result.riskLevel}  |  Threats: ${result.threatsFound.length}  |  ⏱ ${duration}ms`);
+      if (result.threatsFound.length > 0) {
+        console.log(`   ⚠️  Threats: ${result.threatsFound.map(t => t.id).join(', ')}`);
+      }
+
+      // Asynchronously log scan to Supabase / local DB
+      const clientIp = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1').split(',')[0].trim();
+      saveScanLog(result, clientIp).catch(err => {
+        console.warn('[DB Error]', err.message);
+      });
+
       return sendJson(res, 200, result);
     }
 
@@ -120,11 +165,13 @@ const server = http.createServer(async (req, res) => {
       const targetUrls = urls.slice(0, 30);
       const results = [];
 
+      const clientIp = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1').split(',')[0].trim();
       for (const u of targetUrls) {
         if (!u || typeof u !== 'string' || !u.trim()) continue;
         try {
           const item = await analyzeUrl(u.trim());
           results.push(item);
+          saveScanLog(item, clientIp).catch(() => {});
         } catch (e) {
           results.push({
             url: u,

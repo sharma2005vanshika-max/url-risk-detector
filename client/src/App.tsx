@@ -8,10 +8,11 @@ import { BatchScanner } from './components/BatchScanner';
 import { DefangerTool } from './components/DefangerTool';
 import { ThreatHistory } from './components/ThreatHistory';
 import { SecurityAcademy } from './components/SecurityAcademy';
+import { LiveIntelligence } from './components/LiveIntelligence';
 import { ScanResult, DemoPreset } from './types';
 
 export const App: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'single' | 'batch' | 'defang' | 'history' | 'academy'>('single');
+  const [activeTab, setActiveTab] = useState<'single' | 'batch' | 'defang' | 'history' | 'academy' | 'intel'>('single');
   const [urlInput, setUrlInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -252,12 +253,17 @@ export const App: React.FC = () => {
           <BatchScanner onSelectResult={handleSelectHistoryOrBatchItem} />
         )}
 
-        {/* TAB 3: DEFANGER TOOL */}
+        {/* TAB 3: LIVE GLOBAL INTELLIGENCE (DATABASE) */}
+        {activeTab === 'intel' && (
+          <LiveIntelligence onSelectResult={handleSelectHistoryOrBatchItem} />
+        )}
+
+        {/* TAB 4: DEFANGER TOOL */}
         {activeTab === 'defang' && (
           <DefangerTool />
         )}
 
-        {/* TAB 4: AUDIT HISTORY */}
+        {/* TAB 5: AUDIT HISTORY */}
         {activeTab === 'history' && (
           <ThreatHistory
             history={history}
@@ -266,7 +272,7 @@ export const App: React.FC = () => {
           />
         )}
 
-        {/* TAB 5: SECURITY ACADEMY */}
+        {/* TAB 6: SECURITY ACADEMY */}
         {activeTab === 'academy' && (
           <SecurityAcademy />
         )}
