@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ShieldCheck, Copy, Check, ArrowRightLeft } from 'lucide-react';
+import { apiUrl } from '../api';
 
 export const DefangerTool: React.FC = () => {
   const [inputUrl, setInputUrl] = useState('https://malicious-phishing-link.top/download/ransomware.exe');
@@ -13,7 +14,7 @@ export const DefangerTool: React.FC = () => {
       return;
     }
     try {
-      const res = await fetch('/api/defang', {
+      const res = await fetch(apiUrl('/api/defang'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: val, action: currentMode })

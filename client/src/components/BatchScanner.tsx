@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Layers, Play, Download, RefreshCw } from 'lucide-react';
 import { BatchResult, ScanResult } from '../types';
+import { apiUrl } from '../api';
 
 interface BatchScannerProps {
   onSelectResult: (res: ScanResult) => void;
@@ -37,7 +38,7 @@ export const BatchScanner: React.FC<BatchScannerProps> = ({ onSelectResult }) =>
     setError(null);
 
     try {
-      const response = await fetch('/api/batch-scan', {
+      const response = await fetch(apiUrl('/api/batch-scan'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ urls: lines })

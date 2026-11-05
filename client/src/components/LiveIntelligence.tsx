@@ -4,6 +4,7 @@ import {
   Activity, ArrowUpRight, Flame, BarChart3, Wifi
 } from 'lucide-react';
 import { ScanResult } from '../types';
+import { apiUrl } from '../api';
 
 interface LiveIntelligenceProps {
   onSelectResult: (res: ScanResult) => void;
@@ -30,8 +31,8 @@ export const LiveIntelligence: React.FC<LiveIntelligenceProps> = ({ onSelectResu
     setLoading(true);
     try {
       const [statsRes, scansRes] = await Promise.all([
-        fetch('/api/stats'),
-        fetch('/api/recent-scans')
+        fetch(apiUrl('/api/stats')),
+        fetch(apiUrl('/api/recent-scans'))
       ]);
 
       if (statsRes.ok) {

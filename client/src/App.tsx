@@ -10,6 +10,7 @@ import { ThreatHistory } from './components/ThreatHistory';
 import { SecurityAcademy } from './components/SecurityAcademy';
 import { LiveIntelligence } from './components/LiveIntelligence';
 import { ScanResult, DemoPreset } from './types';
+import { apiUrl } from './api';
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'single' | 'batch' | 'defang' | 'history' | 'academy' | 'intel'>('single');
@@ -59,12 +60,12 @@ export const App: React.FC = () => {
 
   // Check backend health & fetch sample demo URLs
   useEffect(() => {
-    fetch('/api/health')
+    fetch(apiUrl('/api/health'))
       .then(res => res.json())
       .then(() => setServerOnline(true))
       .catch(() => setServerOnline(false));
 
-    fetch('/api/sample-urls')
+    fetch(apiUrl('/api/sample-urls'))
       .then(res => res.json())
       .then(data => setDemoPresets(data))
       .catch(() => {
@@ -109,7 +110,7 @@ export const App: React.FC = () => {
     setError(null);
 
     try {
-      const res = await fetch('/api/scan', {
+      const res = await fetch(apiUrl('/api/scan'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: urlToScan })
